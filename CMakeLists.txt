@@ -16,7 +16,9 @@ ENDIF()
 #include_directories(/usr/local/Cellar/libuv/1.18.0/include)
 #link_directories(/usr/local/Cellar/libuv/1.18.0/lib)
 include_directories(
+    ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/thirdparty/build/include
+    ${CMAKE_SOURCE_DIR}/thirdparty/IpQuery_QQWry
 )
 
 link_directories(
@@ -28,3 +30,4 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(helloworld)
 add_subdirectory(uvstop)
 add_subdirectory(inter-thread-communication)
+add_subdirectory(examples/ip-test)
