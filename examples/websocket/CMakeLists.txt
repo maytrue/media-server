@@ -5,7 +5,7 @@ add_executable(
 
 target_link_libraries(
     echo_server_test
-    uSockets.a
+    -l:uSockets.a 
     -luv
     -lpthread
     -lz
