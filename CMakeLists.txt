@@ -22,6 +22,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/thirdparty/uWebSockets/src
     ${CMAKE_SOURCE_DIR}/thirdparty/uWebSockets/uSockets/src
     ${CMAKE_SOURCE_DIR}/thirdparty/json/include
+    ${CMAKE_SOURCE_DIR}/thirdparty/spdlog/include
 )
 
 link_directories(
@@ -35,4 +36,6 @@ add_subdirectory(helloworld)
 add_subdirectory(uvstop)
 add_subdirectory(inter-thread-communication)
 add_subdirectory(examples/ip-test)
-add_subdirectory(examples/websocket)
+# add_subdirectory(examples/websocket)
+add_subdirectory(examples/json)
+add_subdirectory(rtp_rtcp)
