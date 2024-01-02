@@ -33,7 +33,7 @@ link_directories(
 set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(helloworld)
-add_subdirectory(uvstop)
+add_subdirectory(libuv)
 add_subdirectory(inter-thread-communication)
 add_subdirectory(examples/ip-test)
 # add_subdirectory(examples/websocket)

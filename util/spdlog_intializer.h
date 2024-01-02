@@ -2,8 +2,7 @@
 // Created by guowei on 2022/11/23.
 //
 
-#ifndef BOOST_EXAMPLE_SERVER_RTC_SERVER_LOG_H_
-#define BOOST_EXAMPLE_SERVER_RTC_SERVER_LOG_H_
+#pragma once
 
 #include "spdlog/sinks/daily_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -15,7 +14,7 @@
 
 namespace rtcserver {
 
-class RtcServerLog {
+class SpdlogInitializer {
  public:
   static void Init() {
     auto daily_sink =
@@ -33,5 +32,3 @@ class RtcServerLog {
 };
 
 }  // namespace rtcserver
-
-#endif  // BOOST_EXAMPLE_SERVER_RTC_SERVER_LOG_H_
