@@ -3,16 +3,16 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#include "util/rtc_server_log.h"
+#include "util/spdlog_intializer.h"
 
-static const char* RTPFILE_VERSION = "1.0";
+static const char *RTPFILE_VERSION = "1.0";
 
 PacketParser::PacketParser() {}
 
 PacketParser::~PacketParser() {}
 
-void PacketParser::ReadRtpPacketInfo(uint8_t* data, size_t len) {
-  uint8_t* ptr = (uint8_t*)data;
+void PacketParser::ReadRtpPacketInfo(uint8_t *data, size_t len) {
+  uint8_t *ptr = (uint8_t *)data;
   size_t bytes_remain = len;
   size_t pos = 0;
   if (!dump_header_parsed_) {
@@ -23,12 +23,12 @@ void PacketParser::ReadRtpPacketInfo(uint8_t* data, size_t len) {
       return;
     }
 
-    if (strncmp((char*)data, magic, strlen(magic)) != 0) {
+    if (strncmp((char *)data, magic, strlen(magic)) != 0) {
       return;
     }
 
     std::string str;
-    str.assign((char*)data, strlen(magic));
+    str.assign((char *)data, strlen(magic));
     LOG_INFO("magic str:{}", str);
 
     // skip magic
@@ -46,7 +46,7 @@ void PacketParser::ReadRtpPacketInfo(uint8_t* data, size_t len) {
       ptr = ptr + 1;
     }
 
-    str.assign((char*)data, pos);
+    str.assign((char *)data, pos);
     LOG_INFO("byte:{:#04x} pos:{} str:{}", data[pos], pos, str);
     bytes_remain = bytes_remain - 1;
     ptr = ptr + 1;
@@ -56,7 +56,7 @@ void PacketParser::ReadRtpPacketInfo(uint8_t* data, size_t len) {
       return;
     }
 
-    RD_hdr_t* hdr = (RD_hdr_t*)ptr;
+    RD_hdr_t *hdr = (RD_hdr_t *)ptr;
     struct in_addr in;
     in.s_addr = hdr->source;
     LOG_INFO("source:{} port:{}", inet_ntoa(in), ntohs(hdr->port));
@@ -71,7 +71,7 @@ void PacketParser::ReadRtpPacketInfo(uint8_t* data, size_t len) {
       break;
     }
 
-    RD_packet_t* packet = (RD_packet_t*)ptr;
+    RD_packet_t *packet = (RD_packet_t *)ptr;
     packet->length = ntohs(packet->length);
     size_t body_len = packet->length - sizeof(RD_packet_t);
     packet->plen = ntohs(packet->plen);
@@ -84,20 +84,20 @@ void PacketParser::ReadRtpPacketInfo(uint8_t* data, size_t len) {
 
     if (packet->plen == 0) {
       // RTCP
-      RtcpHeader* head = (RtcpHeader*)ptr;
+      RtcpHeader *head = (RtcpHeader *)ptr;
       uint8_t version = head->version;
       head->length = ntohs(head->length);
       LOG_INFO("RTCP version:{} packet_type:{} length:{}", version,
                head->packet_type, head->length);
       switch (head->packet_type) {
-        case kRtcpPayloadTypeSR:
-          RtcpSR* sr = (RtcpSR*)(ptr + sizeof(RtcpHeader));
-          sr->ssrc = ntohl(sr->ssrc);
-          LOG_INFO("RTCP sender report ssrc:{:#04x}", sr->ssrc);
-          break;
+      case kRtcpPayloadTypeSR:
+        RtcpSR *sr = (RtcpSR *)(ptr + sizeof(RtcpHeader));
+        sr->ssrc = ntohl(sr->ssrc);
+        LOG_INFO("RTCP sender report ssrc:{:#04x}", sr->ssrc);
+        break;
       }
     } else {
-      RtpCommonHeader* head = (RtpCommonHeader*)ptr;
+      RtpCommonHeader *head = (RtpCommonHeader *)ptr;
       uint8_t version = head->version;
       head->seq = ntohs(head->seq);
       head->ssrc = ntohl(head->ssrc);
