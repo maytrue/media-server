@@ -8,7 +8,7 @@ add_executable(
 
 target_link_libraries(
     libuv_client
-    uv
+    PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     pthread
     dl
 )
@@ -20,7 +20,7 @@ add_executable(
 
 target_link_libraries(
     libuv_server
-    uv
+    PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     pthread
     dl
 )

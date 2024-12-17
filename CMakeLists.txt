@@ -6,7 +6,7 @@ project(uv)
 
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/thirdparty/build/lib/cmake)
 find_package(PkgConfig REQUIRED)
-find_package(libuv REQUIRED)
+find_package(libuv CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(FFMPEG REQUIRED)
 
