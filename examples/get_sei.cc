@@ -43,7 +43,9 @@ int main(int argc, char *argv[]) {
     printf("Could not find video stream\n");
     return -1;
   }
+
   std::cout << "video_stream_index:" << video_stream_index << std::endl;
+  av_dump_format(fmt_ctx, 0, file_name, 0);
 
   AVPacket *pkt = av_packet_alloc();
   while (av_read_frame(fmt_ctx, pkt) >= 0) {
