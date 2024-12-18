@@ -54,37 +54,12 @@ int main(int argc, char *argv[]) {
 
   std::cout << "video_stream_index:" << video_stream_index << std::endl;
   av_dump_format(fmt_ctx, 0, file_name, 0);
-  AVBSFContext* bsf_ctx = NULL;
-  const AVBitStreamFilter* bit_stream_filter = av_bsf_get_by_name("h264_mp4toannexb");
-  if (!bit_stream_filter) {
-    printf("Could not find bitstream filter stream\n");
-    return -1;
-  }
-
-  ret = av_bsf_alloc(bit_stream_filter, &bsf_ctx);
-  if (ret != 0) {
-    printf("failed to allocate bitstream filter context\n");
-    return -1;
-  }
-
-  avcodec_parameters_copy(bsf_ctx->par_in, fmt_ctx->streams[video_stream_index]->codecpar);
-  av_bsf_init(bsf_ctx);
 
   AVPacket *pkt = av_packet_alloc();
   AVPacket *bsf_pkt = av_packet_alloc();
   while (av_read_frame(fmt_ctx, pkt) >= 0) {
     if (pkt->stream_index == video_stream_index) {
       extract_sei(pkt);
-      // ret = av_bsf_send_packet(bsf_ctx, pkt);
-      // if (ret < 0) {
-      //   std::cout << "send packet to filter error" << std::endl;
-      //   break;
-      // }
-      //
-      // while ((ret = av_bsf_receive_packet(bsf_ctx, bsf_pkt)) == 0) {
-      //   extract_sei(bsf_pkt);
-      //   av_packet_unref(bsf_pkt);
-      // }
     }
     av_packet_unref(pkt);
   }
@@ -92,9 +67,6 @@ int main(int argc, char *argv[]) {
   av_packet_free(&pkt);
   av_packet_free(&bsf_pkt);
   avformat_close_input(&fmt_ctx);
-  if (bsf_ctx) {
-    av_bsf_free(&bsf_ctx);
-  }
 
   std::cout << "parser exit" << std::endl;
   return 0;
