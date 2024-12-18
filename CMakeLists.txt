@@ -32,9 +32,9 @@ include_directories(
 )
 
 link_directories(
-    ${CMAKE_SOURCE_DIR}/thirdparty/build/lib
-    ${CMAKE_SOURCE_DIR}/thirdparty/uWebSockets/uSockets/
-    # ${FFMPEG_LIBRARY_DIRS}
+#    ${CMAKE_SOURCE_DIR}/thirdparty/build/lib
+#    ${CMAKE_SOURCE_DIR}/thirdparty/uWebSockets/uSockets/
+#    ${FFMPEG_LIBRARY_DIRS}
 )
 
 set(CMAKE_CXX_STANDARD 17)

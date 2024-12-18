@@ -3,21 +3,29 @@
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
+#include <libavcodec/bsf.h>
 }
 
 void extract_sei(AVPacket *pkt) {
   uint8_t *data = pkt->data;
   int size = pkt->size;
   int nal_type = 0;
-  // std::cout << "extract_sei size:" << size << std::endl;
+  std::cout << "extract_sei size:" << size << std::endl;
   while (size > 4) {
-    if (data[0] == 0 && data[1] == 0 && data[2] == 1) {
-      nal_type = (data[3] & 0x1F); // For H.264
-      std::cout << "nal_type:" << nal_type << std::endl;
-    }
 
-    data++;
-    size--;
+    uint32_t nal_size = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
+    std::cout << "nal_size:" << nal_size << std::endl;
+
+    nal_type = (data[4] & 0x1F); // For H.264
+    std::cout << "nal_type:" << nal_type << std::endl;
+
+    // if (data[0] == 0 && data[1] == 0 && data[2] == 1) {
+    //   nal_type = (data[3] & 0x1F); // For H.264
+    //   std::cout << "nal_type:" << nal_type << std::endl;
+    // }
+
+    size = size - nal_size - 4;
+    data = data + nal_size + 4;
   }
 }
 
@@ -46,16 +54,48 @@ int main(int argc, char *argv[]) {
 
   std::cout << "video_stream_index:" << video_stream_index << std::endl;
   av_dump_format(fmt_ctx, 0, file_name, 0);
+  AVBSFContext* bsf_ctx = NULL;
+  const AVBitStreamFilter* bit_stream_filter = av_bsf_get_by_name("h264_mp4toannexb");
+  if (!bit_stream_filter) {
+    printf("Could not find bitstream filter stream\n");
+    return -1;
+  }
+
+  ret = av_bsf_alloc(bit_stream_filter, &bsf_ctx);
+  if (ret != 0) {
+    printf("failed to allocate bitstream filter context\n");
+    return -1;
+  }
+
+  avcodec_parameters_copy(bsf_ctx->par_in, fmt_ctx->streams[video_stream_index]->codecpar);
+  av_bsf_init(bsf_ctx);
 
   AVPacket *pkt = av_packet_alloc();
+  AVPacket *bsf_pkt = av_packet_alloc();
   while (av_read_frame(fmt_ctx, pkt) >= 0) {
     if (pkt->stream_index == video_stream_index) {
       extract_sei(pkt);
+      // ret = av_bsf_send_packet(bsf_ctx, pkt);
+      // if (ret < 0) {
+      //   std::cout << "send packet to filter error" << std::endl;
+      //   break;
+      // }
+      //
+      // while ((ret = av_bsf_receive_packet(bsf_ctx, bsf_pkt)) == 0) {
+      //   extract_sei(bsf_pkt);
+      //   av_packet_unref(bsf_pkt);
+      // }
     }
     av_packet_unref(pkt);
   }
 
   av_packet_free(&pkt);
+  av_packet_free(&bsf_pkt);
   avformat_close_input(&fmt_ctx);
+  if (bsf_ctx) {
+    av_bsf_free(&bsf_ctx);
+  }
+
+  std::cout << "parser exit" << std::endl;
   return 0;
 }
