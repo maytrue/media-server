@@ -59,6 +59,35 @@ int main(int argc, char *argv[]) {
   AVPacket *bsf_pkt = av_packet_alloc();
   while (av_read_frame(fmt_ctx, pkt) >= 0) {
     if (pkt->stream_index == video_stream_index) {
+      if (pkt->flags & AV_PKT_FLAG_KEY) {
+        uint8_t *extradata = fmt_ctx->streams[video_stream_index]->codecpar->extradata;
+        int extradata_size = fmt_ctx->streams[video_stream_index]->codecpar->extradata_size;
+        std::cout << "extradata_size:" << extradata_size << std::endl;
+
+        std::cout << "version:" << (extradata[0] & 0xFF) << std::endl;
+        int sps_number = (extradata[5] & 0x1F);
+        std::cout << "sps_number:" << sps_number << std::endl;
+
+        int sps_length = 0;
+        int offset = 6;
+        for (int i = 0; i < sps_number; i++) {
+          sps_length = (extradata[6] << 8) | extradata[7];
+          std::cout << "sps_length:" << sps_length << std::endl;
+          offset = offset + 2 + sps_length;
+        }
+
+        std::cout << "pps_offset:" << offset << std::endl;
+        int pps_number = (extradata[offset] & 0xFF);
+        std::cout << "pps_number:" << pps_number << std::endl;
+        offset ++;
+
+        for (int i = 0; i < pps_number; i++) {
+          int pps_length = (extradata[offset] << 8) | extradata[offset + 1];
+          offset = offset + 2;
+          std::cout << "pps_length:" << pps_length << std::endl;
+        }
+      }
+
       extract_sei(pkt);
     }
     av_packet_unref(pkt);
