@@ -6,6 +6,56 @@ extern "C" {
 #include <libavcodec/bsf.h>
 }
 
+static const int kPayloadType251 = 251;
+
+void ParseSei(uint8_t* buffer, int buffer_size) {
+  if (buffer_size == 0) {
+    printf("[HxxStreamParser] ParseSei buffer_size is zero\n");
+    return;
+  }
+  printf("[HxxStreamParser] ParseSei found sei nal unit\n");
+  int payload_type = 0;
+  int payload_size = 0;
+  int pos = 0;
+
+  while (pos < buffer_size) {
+    uint8_t ch = buffer[pos++];
+    payload_type = payload_type + ch;
+    if (ch != 0xFF) {
+      break;
+    }
+  }
+  printf("[HxxStreamParser] ParseSei payload_type:%d\n", payload_type);
+
+  while (pos < buffer_size) {
+    uint8_t ch = buffer[pos++];
+    payload_size = payload_size + ch;
+    if (ch != 0xFF) {
+      break;
+    }
+  }
+  printf("[HxxStreamParser] ParseSei payload_size:%d\n", payload_size);
+
+  if (payload_type == kPayloadType251) {
+    int flag = buffer[pos++];
+    // get sei length two bytes
+    int sei_len = buffer[pos++];
+    sei_len = (sei_len << 8) + (buffer[pos++] & 0xFF);
+    printf("[HxxStreamParser] ParseSei sei_len:%d\n", sei_len);
+
+    std::unique_ptr<uint8_t[]> payload(new uint8_t[sei_len]);
+    for (int i = 0, emu_count = 0; i < payload_size && pos < buffer_size; i++, emu_count++) {
+      payload[i] = buffer[pos++];
+      // drop emulation prevention bytes
+      if (emu_count >= 2 && payload[i] == 0x03 && payload[i - 1] == 0x00 && payload[i - 2] == 0x00) {
+        i--;
+        emu_count = 0;
+      }
+    }
+
+  }
+}
+
 void extract_sei(AVPacket *pkt) {
   uint8_t *data = pkt->data;
   int size = pkt->size;
@@ -18,6 +68,10 @@ void extract_sei(AVPacket *pkt) {
 
     nal_type = (data[4] & 0x1F); // For H.264
     std::cout << "nal_type:" << nal_type << std::endl;
+
+    if (nal_type == 6) {
+      ParseSei(data + 5, nal_size - 1);
+    }
 
     // if (data[0] == 0 && data[1] == 0 && data[2] == 1) {
     //   nal_type = (data[3] & 0x1F); // For H.264
