@@ -13,3 +13,14 @@ add_executable(
 target_include_directories(get_sei PRIVATE ${FFMPEG_INCLUDE_DIRS})
 target_link_directories(get_sei PRIVATE ${FFMPEG_LIBRARY_DIRS})
 target_link_libraries(get_sei PRIVATE ${FFMPEG_LIBRARIES})
+
+add_executable(
+    uv_timer_test
+    uv_timer_test.cc
+)
+target_link_libraries(
+        uv_timer_test
+        PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+        pthread
+        dl
+)
