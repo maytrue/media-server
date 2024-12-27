@@ -2,6 +2,7 @@
   "dependencies": [
     "ffmpeg",
     "fmt",
-    "libuv"
+    "libuv",
+    "boost-asio"
   ]
 }
