@@ -38,7 +38,7 @@ link_directories(
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_subdirectory(libuv
+add_subdirectory(libuv)
 add_subdirectory(inter-thread-communication)
 # add_subdirectory(examples/websocket)
 add_subdirectory(examples/json)
