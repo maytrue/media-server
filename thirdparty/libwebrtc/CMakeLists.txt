@@ -1,0 +1,43 @@
+add_definitions(-DWEBRTC_POSIX)
+add_definitions(-DWEBRTC_MAC)
+add_definitions(-DRTC_DISABLE_TRACE_EVENTS)
+add_definitions(-DRTC_USE_PERFETTO)
+
+file(
+        GLOB_RECURSE
+        SOURCE_RTP_RTCP
+        ${CMAKE_CURRENT_SOURCE_DIR}/modules/rtp_rtcp/source/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/api/rtp_headers.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/api/video/color_space.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/api/video/hdr_metadata.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/api/video/video_timing.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/api/video/video_content_type.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/api/rtc_error.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/api/transport/network_types.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/api/units/data_rate.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/api/units/time_delta.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/system_wrappers/source/rtp_to_ntp_estimator.cc
+)
+
+set(
+        RTC_BASE_SOURCE
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/copy_on_write_buffer.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/logging.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/platform_thread_types.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/time_utils.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/system_time.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/checks.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/strings/string_builder.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/string_utils.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/string_encode.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/bit_buffer.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/bitstream_reader.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtc_base/random.cc
+)
+
+add_library(
+        webrtc
+        STATIC
+        ${SOURCE_RTP_RTCP}
+        ${RTC_BASE_SOURCE}
+)
