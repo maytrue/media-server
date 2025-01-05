@@ -28,6 +28,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/thirdparty/uWebSockets/uSockets/src
     ${CMAKE_SOURCE_DIR}/thirdparty/json/include
     ${CMAKE_SOURCE_DIR}/thirdparty/spdlog/include
+    ${CMAKE_SOURCE_DIR}/thirdparty/libwebrtc
     # ${FFMPEG_INCLUDE_DIRS}
 )
 
@@ -46,3 +47,4 @@ add_subdirectory(examples/json)
 add_subdirectory(rtp_rtcp)
 add_subdirectory(examples)
 add_subdirectory(asio)
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/libwebrtc)
