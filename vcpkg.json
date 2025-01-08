@@ -1,8 +1,9 @@
 {
   "dependencies": [
+    "boost-asio",
     "ffmpeg",
     "fmt",
     "libuv",
-    "boost-asio"
+    "boost-beast"
   ]
 }

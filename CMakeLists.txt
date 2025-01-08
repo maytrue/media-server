@@ -10,6 +10,7 @@ find_package(libuv CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(FFMPEG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS asio)
+find_package(Boost REQUIRED COMPONENTS beast)
 
 IF(LIBUV_FOUND)
     message("libuv found")
