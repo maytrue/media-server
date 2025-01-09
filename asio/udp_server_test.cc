@@ -3,22 +3,24 @@
 //
 
 #include <iostream>
+#include <memory>
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
+#include <nlohmann/json.hpp>
 
 #include "modules/rtp_rtcp/source/rtp_packet_received.h"
 #include "util/spdlog_intializer.h"
+#include "room_manager.h"
 
 using boost::asio::ip::udp;
 using boost::asio::ip::tcp;
-using namespace webrtc;
 
 namespace beast = boost::beast;
 namespace http = beast::http;
 
-class Participant;
-class Room;
-class RoomManager;
+using namespace webrtc;
+using namespace nlohmann;
+using namespace stream;
 
 class UdpServer {
  public:
@@ -68,7 +70,9 @@ class UdpServer {
 
 class HttpSession : public std::enable_shared_from_this<HttpSession> {
  public:
-  HttpSession(tcp::socket socket) : socket_(std::move(socket)) {
+  HttpSession(tcp::socket socket, const std::shared_ptr<RoomManager> &room_manager)
+      : socket_(std::move(socket)),
+        room_manager_(room_manager) {
     LOG_INFO("[HttpSession] HttpSession this:{}", fmt::ptr(this));
   }
 
@@ -92,17 +96,47 @@ class HttpSession : public std::enable_shared_from_this<HttpSession> {
   }
 
   void HandleRequest() {
+    response_.result(http::status::ok);
+    response_.set(http::field::content_type, "application/json");
+
+    if (request_.method() == http::verb::get && request_.target() == "/api/rooms") {
+      std::vector<std::shared_ptr<Room>> rooms = room_manager_->GetRooms();
+      json result;
+      json json_array = json::array();
+
+      for (auto& room : rooms) {
+        json_array.push_back(room->room_id());
+      }
+
+      result["result"] = 0;
+      result["rooms"] = json_array;
+      response_.body() = result.dump();
+    } else if (request_.method() == http::verb::post && request_.target() == "/api/room") {
+      json body = json::parse(request_.body());
+      uint64_t rid = body["rid"];
+
+
+      json result;
+      result["result"] = 0;
+      response_.body() = result.dump();
+    } else {
+      response_.result(http::status::not_found);
+      json result;
+      result["result"] = -1;
+      response_.body() = result.dump();
+    }
+
     response_.version(request_.version());
     response_.keep_alive(false);
-    response_.set(http::field::content_type, "text/plain");
-    response_.body() = "Hello, World!";
+    // response_.set(http::field::content_type, "text/plain");
+    // response_.body() = "Hello, World!";
     response_.prepare_payload();
 
     auto self = shared_from_this();
     http::async_write(socket_, response_,
-                             [this, self](boost::system::error_code ec, std::size_t /*length*/) {
-                                self->socket_.shutdown(tcp::socket::shutdown_send, ec);
-                             });
+                      [this, self](boost::system::error_code ec, std::size_t /*length*/) {
+                        self->socket_.shutdown(tcp::socket::shutdown_send, ec);
+                      });
   }
 
  private:
@@ -110,30 +144,24 @@ class HttpSession : public std::enable_shared_from_this<HttpSession> {
   beast::flat_buffer buffer_;
   http::request<http::string_body> request_;
   http::response<http::string_body> response_;
+  std::shared_ptr<RoomManager> room_manager_;
 };
 
 class HttpServer {
  public:
-  HttpServer(boost::asio::io_context &io_context, short port)
-      : acceptor_(io_context, tcp::endpoint(tcp::v4(), port)) {
+  HttpServer(boost::asio::io_context &io_context, short port, const std::shared_ptr<RoomManager> &room_manager)
+      : acceptor_(io_context, tcp::endpoint(tcp::v4(), port)),
+        room_manager_(room_manager) {
     StartAccept();
   }
 
  private:
   void StartAccept() {
     LOG_INFO("[HttpServer] StartAccept this:{}", fmt::ptr(this));
-    // tcp::socket socket(acceptor_.get_executor());
-    // acceptor_.async_accept(socket, [this, &socket](const boost::system::error_code &error) {
-    //   if (!error) {
-    //     std::make_shared<HttpSession>(std::move(socket))->Start();
-    //   }
-    //   StartAccept();
-    // });
-
     acceptor_.async_accept(
         [this](beast::error_code ec, tcp::socket socket) {
           if (!ec) {
-            std::make_shared<HttpSession>(std::move(socket))->Start();
+            std::make_shared<HttpSession>(std::move(socket), room_manager_)->Start();
           }
           StartAccept();
         });
@@ -141,61 +169,9 @@ class HttpServer {
 
  private:
   tcp::acceptor acceptor_;
+  std::shared_ptr<RoomManager> room_manager_;
 };
 
-class RoomManager {
- public:
-  RoomManager() = default;
-  ~RoomManager() = default;
-
-  void AddRoom(uint64_t rid) {
-    rooms_.insert(std::make_pair(rid, std::make_shared<Room>(rid)));
-  }
-
-  std::shared_ptr<Room> GetRoom(uint64_t rid) {
-    auto it = rooms_.find(rid);
-    if (it != rooms_.end()) {
-      return it->second;
-    }
-    return nullptr;
-  }
-
- private:
-  std::unordered_map<uint64_t, std::shared_ptr<Room>> rooms_;
-};
-
-class Room {
- public:
-  explicit Room(uint64_t room_id) : room_id_(room_id) {
-
-  }
-
-  ~Room() = default;
-
-  void AddParticipant(uint64_t pid, uint32_t audio_ssrc, uint32_t video_ssrc) {
-    participants_.emplace_back(pid, audio_ssrc, video_ssrc);
-  }
-
- private:
-  std::vector<Participant> participants_;
-  uint64_t room_id_ = 0;
-};
-
-
-class Participant {
- public:
-  Participant(uint64_t pid, uint32_t audio_ssrc, uint32_t video_ssrc)
-      : pid_(pid), audio_ssrc_(audio_ssrc), video_ssrc_(video_ssrc) {
-  }
-
-  ~Participant() = default;
-
-
- private:
-  uint64_t pid_ = 0;
-  uint32_t audio_ssrc_ = 0;
-  uint32_t video_ssrc_ = 0;
-};
 
 int main(int argc, char *argv[]) {
   rtcserver::SpdlogInitializer::Init();
@@ -203,7 +179,7 @@ int main(int argc, char *argv[]) {
   auto room_manager = std::make_shared<RoomManager>();
   boost::asio::io_context io_context;
   UdpServer server(io_context, 12345);
-  HttpServer http_server(io_context, 8080);
+  HttpServer http_server(io_context, 8080, room_manager);
   io_context.run();
   return 0;
 }
