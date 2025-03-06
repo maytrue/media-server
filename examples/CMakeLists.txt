@@ -24,3 +24,20 @@ target_link_libraries(
         pthread
         dl
 )
+
+add_executable(
+        ffmpeg_overlay_test
+        ffmpeg_overlay_test.cc
+)
+target_include_directories(ffmpeg_overlay_test PRIVATE ${FFMPEG_INCLUDE_DIRS})
+target_link_directories(ffmpeg_overlay_test PRIVATE ${FFMPEG_LIBRARY_DIRS})
+target_link_libraries(ffmpeg_overlay_test PRIVATE ${FFMPEG_LIBRARIES})
+
+
+add_executable(
+        overlay_test
+        overlay_test.cc
+)
+target_include_directories(overlay_test PRIVATE ${FFMPEG_INCLUDE_DIRS})
+target_link_directories(overlay_test PRIVATE ${FFMPEG_LIBRARY_DIRS})
+target_link_libraries(overlay_test PRIVATE ${FFMPEG_LIBRARIES})
