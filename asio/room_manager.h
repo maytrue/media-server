@@ -7,7 +7,7 @@
 #include <iostream>
 #include <memory>
 
-namespace stream {
+namespace rtcserver {
 
 class Participant {
  public:
