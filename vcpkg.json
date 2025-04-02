@@ -1,9 +1,10 @@
 {
   "dependencies": [
     "boost-asio",
+    "boost-beast",
     "ffmpeg",
     "fmt",
     "libuv",
-    "boost-beast"
+    "folly"
   ]
 }
