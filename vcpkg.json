@@ -5,6 +5,8 @@
     "ffmpeg",
     "fmt",
     "libuv",
-    "folly"
+    "folly",
+    "spdlog",
+    "nlohmann-json"
   ]
 }

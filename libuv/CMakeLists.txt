@@ -1,5 +1,10 @@
 add_executable(uvstop uv_stop.cpp)
-target_link_libraries(uvstop uv pthread dl)
+target_link_libraries(uvstop 
+    PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+    pthread 
+    dl
+    spdlog::spdlog
+)
 
 add_executable(
     libuv_client
@@ -11,6 +16,7 @@ target_link_libraries(
     PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     pthread
     dl
+    spdlog::spdlog
 )
 
 add_executable(
@@ -23,5 +29,6 @@ target_link_libraries(
     PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     pthread
     dl
+    spdlog::spdlog
 )
 

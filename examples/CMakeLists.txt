@@ -5,6 +5,7 @@ add_executable(ffmpeg_test ffmpeg_test.cc)
 target_include_directories(ffmpeg_test PRIVATE ${FFMPEG_INCLUDE_DIRS})
 target_link_directories(ffmpeg_test PRIVATE ${FFMPEG_LIBRARY_DIRS})
 target_link_libraries(ffmpeg_test PRIVATE ${FFMPEG_LIBRARIES})
+target_link_libraries(ffmpeg_test PRIVATE spdlog::spdlog)
 
 add_executable(
     get_sei

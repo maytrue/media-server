@@ -3,6 +3,8 @@
 //
 
 #include <iostream>
+#include <memory>
+#include <unordered_map>
 #include <libavfilter/avfilter.h>
 
 struct LayoutConfig {

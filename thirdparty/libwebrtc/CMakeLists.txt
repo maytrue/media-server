@@ -1,5 +1,11 @@
-add_definitions(-DWEBRTC_POSIX)
-add_definitions(-DWEBRTC_MAC)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux") 
+  add_definitions(-DWEBRTC_POSIX)
+  add_definitions(-DWEBRTC_LINUX)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  add_definitions(-DWEBRTC_POSIX)
+  add_definitions(-DWEBRTC_MAC)
+endif()
+
 add_definitions(-DRTC_DISABLE_TRACE_EVENTS)
 add_definitions(-DRTC_USE_PERFETTO)
 

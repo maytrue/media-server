@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <cstdint>
 
 struct RtcpHeader {
   uint8_t count : 5;

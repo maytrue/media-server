@@ -12,12 +12,15 @@ find_package(FFMPEG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS asio)
 find_package(Boost REQUIRED COMPONENTS beast)
 find_package(folly CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
-IF(LIBUV_FOUND)
-    message("libuv found")
-    SET(LIBUV_INCLUDE_DIRS "${LIBUV_INCLUDE_DIR}")
-    SET(LIBUV_LIBRARIES "${LIBUV_LIBRARY}")
-ENDIF()
+
+# IF(LIBUV_FOUND)
+#     message("libuv found")
+#     SET(LIBUV_INCLUDE_DIRS "${LIBUV_INCLUDE_DIR}")
+#     SET(LIBUV_LIBRARIES "${LIBUV_LIBRARY}")
+# ENDIF()
 
 # pkg_check_modules(UV REQUIRED libuv)
 
@@ -25,11 +28,11 @@ ENDIF()
 #link_directories(/usr/local/Cellar/libuv/1.18.0/lib)
 include_directories(
     ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/thirdparty/build/include
-    ${CMAKE_SOURCE_DIR}/thirdparty/uWebSockets/src
-    ${CMAKE_SOURCE_DIR}/thirdparty/uWebSockets/uSockets/src
-    ${CMAKE_SOURCE_DIR}/thirdparty/json/include
-    ${CMAKE_SOURCE_DIR}/thirdparty/spdlog/include
+    # ${CMAKE_SOURCE_DIR}/thirdparty/build/include
+    # ${CMAKE_SOURCE_DIR}/thirdparty/uWebSockets/src
+    # ${CMAKE_SOURCE_DIR}/thirdparty/uWebSockets/uSockets/src
+    # ${CMAKE_SOURCE_DIR}/thirdparty/json/include
+    # ${CMAKE_SOURCE_DIR}/thirdparty/spdlog/include
     ${CMAKE_SOURCE_DIR}/thirdparty/libwebrtc
     # ${FFMPEG_INCLUDE_DIRS}
 )

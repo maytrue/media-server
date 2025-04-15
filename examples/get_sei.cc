@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 extern "C" {
 #include <libavformat/avformat.h>
