@@ -3,6 +3,7 @@
 //
 
 #include <folly/Benchmark.h>
+#include <folly/small_vector.h>
 #include <vector>
 
 using namespace std;
@@ -20,6 +21,14 @@ BENCHMARK(insertBackVector) {
   vector<int> v;
   for (unsigned int i = 0; i < 100; ++i) {
     v.insert(v.end(), i);
+  }
+}
+
+BENCHMARK(insertSmallVector) {
+  small_vector<int> v;
+  for (unsigned int i = 0; i < 1000; ++i) {
+    // v.insert(v.end(), i);
+    v.push_back(i);
   }
 }
 
